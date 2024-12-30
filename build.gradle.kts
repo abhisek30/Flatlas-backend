@@ -1,3 +1,4 @@
+import io.ktor.plugin.features.*
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -13,6 +14,26 @@ application {
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+ktor {
+    fatJar {
+        archiveFileName = "fat.jar"
+    }
+
+    docker {
+        jreVersion.set(JavaVersion.VERSION_21)
+        localImageName.set("sample-docker-image-flat-hunt")
+        imageTag.set("0.0.1-preview")
+
+        externalRegistry.set(
+            DockerImageRegistry.dockerHub(
+                appName = provider { "flat-hunt-app" },
+                username = providers.environmentVariable("DOCKER_HUB_USERNAME"),
+                password = providers.environmentVariable("DOCKER_HUB_PASSWORD")
+            )
+        )
+    }
 }
 
 repositories {
