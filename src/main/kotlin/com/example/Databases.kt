@@ -16,7 +16,7 @@ import java.sql.DriverManager
 import org.jetbrains.exposed.sql.*
 
 fun Application.configureDatabases() {
-    val dbConnection: Connection = connectToPostgres(embedded = true)
+    val dbConnection: Connection = connectToPostgres(embedded = false)
     val cityService = CityService(dbConnection)
     
     routing {
@@ -55,11 +55,11 @@ fun Application.configureDatabases() {
         }
     }
     val database = Database.connect(
-        url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
-        user = "root",
-        driver = "org.h2.Driver",
-        password = "",
+        url = environment.config.property("postgres.url").getString(),
+        user = environment.config.property("postgres.user").getString(),
+        password = environment.config.property("postgres.password").getString(),
     )
+    log.info("Connecting to postgres database at ${environment.config.property("postgres.url").getString()}")
     val userService = UserService(database)
     routing {
         // Create user
