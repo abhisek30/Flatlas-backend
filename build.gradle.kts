@@ -55,4 +55,9 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.52.0")
+    implementation("org.jetbrains.exposed:exposed-json:0.57.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+
 }
