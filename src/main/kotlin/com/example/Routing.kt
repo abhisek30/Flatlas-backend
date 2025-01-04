@@ -1,7 +1,9 @@
 package com.example
 
 import com.example.routes.flatRoutes
+import com.example.routes.userRoutes
 import com.example.services.FlatService
+import com.example.services.UserService
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -15,10 +17,12 @@ fun Application.configureRouting() {
     )
     log.info("Connecting to postgres database at ${environment.config.property("postgres.url").getString()}")
     val flatService = FlatService(database)
+    val userService = UserService(database)
     routing {
         get("/") {
             call.respondText("Hello World!")
         }
         flatRoutes(flatService)
+        userRoutes(userService)
     }
 }

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Flat(
-    val id: Int,
+    val id: Int? = null,
     val address: String,
     val price: Double,
     val details: String,
@@ -18,8 +18,7 @@ data class Flat(
 )
 
 @Serializable
-data class Amenity(
-    val map : MutableMap<String,Boolean>)
+data class Amenity(val map : MutableMap<String,Boolean>)
 
 @Serializable
 data class Images(val urls: List<String>)
