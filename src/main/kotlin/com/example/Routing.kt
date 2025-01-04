@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.routes.authRoutes
 import com.example.routes.flatRoutes
 import com.example.routes.userRoutes
 import com.example.services.FlatService
@@ -8,6 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.Database
+import org.postgresql.gss.MakeGSS.authenticate
 
 fun Application.configureRouting() {
     val database = Database.connect(
@@ -24,5 +26,6 @@ fun Application.configureRouting() {
         }
         flatRoutes(flatService)
         userRoutes(userService)
+        authRoutes(userService)
     }
 }

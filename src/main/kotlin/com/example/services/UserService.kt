@@ -73,6 +73,36 @@ class UserService(database: Database) {
         }
     }
 
+    suspend fun authenticate(email: String, passwordHash: String): User? {
+        return dbQuery {
+            Users.selectAll().where { (Users.email eq email) and (Users.passwordHash eq passwordHash) }
+                .map { User(
+                    id = it[Users.id],
+                    name = it[Users.name],
+                    email = it[Users.email],
+                    passwordHash = it[Users.passwordHash],
+                    createdAt = it[Users.createdAt].toString(),
+                    updatedAt = it[Users.updatedAt].toString()
+                ) }
+                .singleOrNull()
+        }
+    }
+
+    suspend fun findByEmail(email: String): User? {
+        return dbQuery {
+            Users.selectAll().where { Users.email eq email }
+                .map { User(
+                    id = it[Users.id],
+                    name = it[Users.name],
+                    email = it[Users.email],
+                    passwordHash = it[Users.passwordHash],
+                    createdAt = it[Users.createdAt].toString(),
+                    updatedAt = it[Users.updatedAt].toString()
+                ) }
+                .singleOrNull()
+        }
+    }
+
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 }
