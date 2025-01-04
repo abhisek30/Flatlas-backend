@@ -14,7 +14,7 @@ fun Route.authRoutes(userService: UserService) {
         val authenticatedUser = userService.authenticate(user.email, user.passwordHash.orEmpty())
         if (authenticatedUser != null) {
             val token = generateToken(authenticatedUser.id!!)
-            call.respond(mapOf("token" to token))
+            call.respond(mapOf("message" to "User registered with ID: ${authenticatedUser.id}", "token" to token))
         } else {
             call.respondText("Invalid credentials", status = HttpStatusCode.Unauthorized)
         }

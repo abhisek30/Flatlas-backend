@@ -1,6 +1,7 @@
 package com.example.services
 
 import com.example.models.User
+import com.example.services.UserService.Users
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -10,6 +11,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.mindrot.jbcrypt.BCrypt
 
 class UserService(database: Database) {
     object Users : Table() {
@@ -30,10 +32,11 @@ class UserService(database: Database) {
     }
 
     suspend fun create(user: User): Int = dbQuery {
+        val hashedPassword = BCrypt.hashpw(user.passwordHash.orEmpty(), BCrypt.gensalt())
         Users.insert {
             it[name] = user.name
             it[email] = user.email
-            it[passwordHash] = user.passwordHash.orEmpty()
+            it[passwordHash] = hashedPassword
             it[createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         }[Users.id]
@@ -75,15 +78,18 @@ class UserService(database: Database) {
 
     suspend fun authenticate(email: String, passwordHash: String): User? {
         return dbQuery {
-            Users.selectAll().where { (Users.email eq email) and (Users.passwordHash eq passwordHash) }
-                .map { User(
-                    id = it[Users.id],
-                    name = it[Users.name],
-                    email = it[Users.email],
-                    passwordHash = it[Users.passwordHash],
-                    createdAt = it[Users.createdAt].toString(),
-                    updatedAt = it[Users.updatedAt].toString()
-                ) }
+            Users.selectAll().where { Users.email eq email }
+                .mapNotNull {
+                    val user = User(
+                        id = it[Users.id],
+                        name = it[Users.name],
+                        email = it[Users.email],
+                        passwordHash = it[Users.passwordHash],
+                        createdAt = it[Users.createdAt].toString(),
+                        updatedAt = it[Users.updatedAt].toString()
+                    )
+                    if (BCrypt.checkpw(passwordHash, user.passwordHash)) user else null
+                }
                 .singleOrNull()
         }
     }
