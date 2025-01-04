@@ -15,6 +15,7 @@ data class Flat(
     val images: List<String>,
     val createdAt: String? = null,
     val updatedAt: String? = null,
+    val userId: Int,
 )
 
 @Serializable

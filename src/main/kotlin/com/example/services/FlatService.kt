@@ -28,15 +28,17 @@ class FlatService(database: Database) {
         val contactInfo = text("contact_info")
         val amenities = jsonb("amenities", format, Amenity.serializer())
         val images = jsonb("images", format, Images.serializer())
-        val createdAt = datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
+        val createdAt =
+            datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
         val updatedAt = datetime("updated_at")
+        val userId = integer("user_id").references(UserService.Users.id)
 
         override val primaryKey = PrimaryKey(id)
     }
 
     init {
         transaction(database) {
-            SchemaUtils.create(Flats)
+            SchemaUtils.createMissingTablesAndColumns(Flats)
         }
     }
 
@@ -52,23 +54,29 @@ class FlatService(database: Database) {
             it[images] = Images(flat.images)
             it[createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            it[userId] = flat.userId
         }[Flats.id]
     }
 
     suspend fun read(id: Int): Flat? {
         return dbQuery {
             Flats.selectAll().where { Flats.id eq id }
-                .map { Flat(it[Flats.id],
-                    it[Flats.address],
-                    it[Flats.price],
-                    it[Flats.details],
-                    it[Flats.latitude],
-                    it[Flats.longitude],
-                    it[Flats.contactInfo],
-                    it[Flats.amenities].map,
-                    it[Flats.images].urls,
-                    it[Flats.createdAt].toString(),
-                    it[Flats.updatedAt].toString()) }
+                .map {
+                    Flat(
+                        it[Flats.id],
+                        it[Flats.address],
+                        it[Flats.price],
+                        it[Flats.details],
+                        it[Flats.latitude],
+                        it[Flats.longitude],
+                        it[Flats.contactInfo],
+                        it[Flats.amenities].map,
+                        it[Flats.images].urls,
+                        it[Flats.createdAt].toString(),
+                        it[Flats.updatedAt].toString(),
+                        it[Flats.userId]
+                    )
+                }
                 .singleOrNull()
         }
     }
@@ -96,31 +104,41 @@ class FlatService(database: Database) {
     }
 
     suspend fun getAllFlats(): List<Flat> = dbQuery {
-        Flats.selectAll().map { Flat(it[Flats.id],
-            it[Flats.address],
-            it[Flats.price],
-            it[Flats.details],
-            it[Flats.latitude],
-            it[Flats.longitude],
-            it[Flats.contactInfo],
-            it[Flats.amenities].map,
-            it[Flats.images].urls,
-            it[Flats.createdAt].toString(),
-            it[Flats.updatedAt].toString()) }
+        Flats.selectAll().map {
+            Flat(
+                it[Flats.id],
+                it[Flats.address],
+                it[Flats.price],
+                it[Flats.details],
+                it[Flats.latitude],
+                it[Flats.longitude],
+                it[Flats.contactInfo],
+                it[Flats.amenities].map,
+                it[Flats.images].urls,
+                it[Flats.createdAt].toString(),
+                it[Flats.updatedAt].toString(),
+                it[Flats.userId]
+            )
+        }
     }
 
     suspend fun searchFlatsNearby(latitude: Double, longitude: Double, radius: Double): List<Flat> = dbQuery {
-        Flats.selectAll().map { Flat(it[Flats.id],
-            it[Flats.address],
-            it[Flats.price],
-            it[Flats.details],
-            it[Flats.latitude],
-            it[Flats.longitude],
-            it[Flats.contactInfo],
-            it[Flats.amenities].map,
-            it[Flats.images].urls,
-            it[Flats.createdAt].toString(),
-            it[Flats.updatedAt].toString()) }.filter {
+        Flats.selectAll().map {
+            Flat(
+                it[Flats.id],
+                it[Flats.address],
+                it[Flats.price],
+                it[Flats.details],
+                it[Flats.latitude],
+                it[Flats.longitude],
+                it[Flats.contactInfo],
+                it[Flats.amenities].map,
+                it[Flats.images].urls,
+                it[Flats.createdAt].toString(),
+                it[Flats.updatedAt].toString(),
+                it[Flats.userId]
+            )
+        }.filter {
             val distance = haversine(latitude, longitude, it.latitude, it.longitude)
             distance <= radius
         }
