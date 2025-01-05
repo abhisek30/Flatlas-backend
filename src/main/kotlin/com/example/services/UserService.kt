@@ -19,6 +19,7 @@ class UserService(database: Database) {
         val name = varchar("name", length = 50).uniqueIndex()
         val email = varchar("email", length = 255).uniqueIndex()
         val passwordHash = varchar("password_hash", length = 64)
+        val uid = varchar("uid", length = 255).uniqueIndex()
         val createdAt = datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
         val updatedAt = datetime("updated_at")
 
@@ -39,6 +40,7 @@ class UserService(database: Database) {
             it[passwordHash] = hashedPassword
             it[createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            it[uid] = user.uid
         }[Users.id]
     }
 
@@ -52,7 +54,8 @@ class UserService(database: Database) {
                     email = it[Users.email],
                     passwordHash = it[Users.passwordHash],
                     createdAt = it[Users.createdAt].toString(),
-                    updatedAt = it[Users.updatedAt].toString()
+                    updatedAt = it[Users.updatedAt].toString(),
+                    uid = it[Users.uid]
                 ) }
                 .singleOrNull()
         }
@@ -86,7 +89,8 @@ class UserService(database: Database) {
                         email = it[Users.email],
                         passwordHash = it[Users.passwordHash],
                         createdAt = it[Users.createdAt].toString(),
-                        updatedAt = it[Users.updatedAt].toString()
+                        updatedAt = it[Users.updatedAt].toString(),
+                        uid = it[Users.uid]
                     )
                     if (BCrypt.checkpw(passwordHash, user.passwordHash)) user else null
                 }
@@ -103,7 +107,8 @@ class UserService(database: Database) {
                     email = it[Users.email],
                     passwordHash = it[Users.passwordHash],
                     createdAt = it[Users.createdAt].toString(),
-                    updatedAt = it[Users.updatedAt].toString()
+                    updatedAt = it[Users.updatedAt].toString(),
+                    uid = it[Users.uid]
                 ) }
                 .singleOrNull()
         }

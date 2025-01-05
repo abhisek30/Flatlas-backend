@@ -59,5 +59,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-json:0.57.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.mindrot:jbcrypt:0.4")
+    implementation("com.google.firebase:firebase-admin:9.4.2")
 
 }
