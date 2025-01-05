@@ -20,6 +20,7 @@ class UserService(database: Database) {
         val email = varchar("email", length = 255).uniqueIndex()
         val passwordHash = varchar("password_hash", length = 64)
         val uid = varchar("uid", length = 255).uniqueIndex()
+        val fcmToken = varchar("fcmToken", length = 255).uniqueIndex()
         val createdAt = datetime("created_at").clientDefault { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
         val updatedAt = datetime("updated_at")
 
@@ -41,6 +42,7 @@ class UserService(database: Database) {
             it[createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             it[uid] = user.uid
+            it[fcmToken] = user.fcmToken
         }[Users.id]
     }
 
@@ -55,7 +57,8 @@ class UserService(database: Database) {
                     passwordHash = it[Users.passwordHash],
                     createdAt = it[Users.createdAt].toString(),
                     updatedAt = it[Users.updatedAt].toString(),
-                    uid = it[Users.uid]
+                    uid = it[Users.uid],
+                    fcmToken = it[Users.fcmToken]
                 ) }
                 .singleOrNull()
         }
@@ -69,6 +72,7 @@ class UserService(database: Database) {
                 it[passwordHash] = user.passwordHash.orEmpty()
                 it[createdAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                 it[updatedAt] = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                it[fcmToken] = user.fcmToken
             }
         }
     }
@@ -90,7 +94,8 @@ class UserService(database: Database) {
                         passwordHash = it[Users.passwordHash],
                         createdAt = it[Users.createdAt].toString(),
                         updatedAt = it[Users.updatedAt].toString(),
-                        uid = it[Users.uid]
+                        uid = it[Users.uid],
+                        fcmToken = it[Users.fcmToken]
                     )
                     if (BCrypt.checkpw(passwordHash, user.passwordHash)) user else null
                 }
@@ -108,7 +113,8 @@ class UserService(database: Database) {
                     passwordHash = it[Users.passwordHash],
                     createdAt = it[Users.createdAt].toString(),
                     updatedAt = it[Users.updatedAt].toString(),
-                    uid = it[Users.uid]
+                    uid = it[Users.uid],
+                    fcmToken = it[Users.fcmToken]
                 ) }
                 .singleOrNull()
         }
